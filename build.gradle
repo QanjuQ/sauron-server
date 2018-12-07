@@ -1,0 +1,39 @@
+buildscript {
+    apply from: "repo.gradle"
+    repositories.addAll allRepos
+
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+        classpath "gradle.plugin.com.avast.gradle:gradle-docker-compose-plugin:$dockerPluginVersion"
+    }
+}
+
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: "org.springframework.boot"
+    apply plugin: "com.avast.gradle.docker-compose"
+    dependencies {
+        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+        testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+        compileOnly "org.projectlombok:lombok:$lombokVersion"
+    }
+
+    plugins.withId('org.springframework.boot') {
+        project.dependencies {
+            annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$springBootVersion"
+        }
+    }
+    plugins.withId('ds-docker-plugin') {
+        model {
+            dsDockerPlugin {
+                springImage {
+                    baseImage = "openjdk:10-jre-slim"
+                    layers {
+                        create { groupId = "com.thoughtworks.step" }
+                    }
+                }
+            }
+        }
+    }
+}
